@@ -4,6 +4,7 @@ import (
     "contest-check-in/protocol"
     "fmt"
     "net"
+    "time"
 )
 
 type CheckInClient struct {
@@ -12,24 +13,30 @@ type CheckInClient struct {
 }
 
 
-func NewClient (IP string, Port int) (*CheckInClient, error) {
-    var err error
+
+func NewClient (IP string, Port int) *CheckInClient {
     client := CheckInClient {
         Address:  fmt.Sprintf("%s:%d", IP, Port),
     }
-    client.Conn, err = net.Dial("tcp", client.Address)
-    if err != nil {
-        return nil, err
-    }
-    return &client, nil
+    return &client
 }
 
-func (client *CheckInClient) Handle() {
+func (client *CheckInClient) Connect() error {
+    var err error
+    client.Conn, err = net.DialTimeout("tcp", client.Address, 3 * time.Second)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (client *CheckInClient) Handle(message chan string) {
     for {
         data := make([]byte, 255)
         msg, err := client.Conn.Read(data)
         if msg == 0 || err != nil {
             fmt.Println("disconnect")
+            message <- "close"
             break
         }
         fmt.Println(string(data[0:msg]))
