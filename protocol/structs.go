@@ -13,6 +13,6 @@ type MessageProtocol struct {
 
 const (
     MagicCode = 0xC540
-    ActionShakeHand = 0x01
+    ActionShakeHand = 0x0001
 )
 

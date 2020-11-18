@@ -1,6 +1,7 @@
 package main
 
 import (
+    "contest-check-in/client"
     "contest-check-in/server"
     "fmt"
     "github.com/urfave/cli/v2"
@@ -23,6 +24,14 @@ func main() {
                 Usage:     "run server",
                 Action: func(context *cli.Context) error {
                     server.RunServerWorker("127.0.0.1", 8088, "")
+                    return nil
+                },
+            },
+            {
+                Name:      "client",
+                Usage:     "run client",
+                Action: func(context *cli.Context) error {
+                    client.NewClientWorker("127.0.0.1", 8088)
                     return nil
                 },
             },

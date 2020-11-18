@@ -30,7 +30,7 @@ func BytesSplitter(data []byte, atEOF bool) (advance int, token []byte, err erro
             // 获取packageLength
             pLen := findPackageLength(data, magicIndex)
             // 下次前进magicIndex+pLen个字节
-            return magicIndex + pLen, data[magicIndex:pLen], nil
+            return magicIndex + pLen, data[magicIndex:magicIndex + 8 + pLen], nil
         }
     }
     // 如果已经到了末尾
@@ -59,7 +59,7 @@ func findMagic (data []byte) int {
 
 func findPackageLength (data []byte, magicIndex int) int {
     if magicIndex + 8 <= len(data) {        // 如果数据合法
-        return int(binary.BigEndian.Uint32(data[magicIndex: magicIndex + 4])    )
+        return int(binary.BigEndian.Uint32(data[magicIndex + 4: magicIndex + 8])    )
     }
     return 0
 }
