@@ -12,10 +12,11 @@ var cMsg chan string
 func doConnect(client *CheckInClient, status int) error {
     if status == 1 {
         log.Println("connection intercept, retry after 3s.")
+        time.Sleep(3 * time.Second)
     } else if status == 2 {
         log.Println("connection failed, retry after 3s.")
+        time.Sleep(3 * time.Second)
     }
-    time.Sleep(3 * time.Second)
     err := client.Connect()
     if err != nil {
         return err
@@ -30,11 +31,7 @@ func NewClientWorker (IP string, Port int) {
     cMsg = make(chan string)
 
     client := NewClient(IP, Port)
-    err := doConnect(client, 0)
-    if err != nil {
-        cMsg <- "fail"
-        log.Println(err.Error())
-    }
+
     go func() {
         for {
             select {
@@ -42,19 +39,23 @@ func NewClientWorker (IP string, Port int) {
                     if msg == "close" {
                         err := doConnect(client, 1)
                         if err != nil {
-                            cMsg <- "fail"
+                            go func() { cMsg <- "fail" }()
                         }
                     } else if msg == "fail" {
                         err := doConnect(client, 2)
                         if err != nil {
-                            cMsg <- "fail"
+                            go func() { cMsg <- "fail" }()
                         }
                     }
             }
         }
     }()
 
-
+    err := doConnect(client, 0)
+    if err != nil {
+        cMsg <- "fail"
+        log.Println(err.Error())
+    }
 
     var msg string
     for {
